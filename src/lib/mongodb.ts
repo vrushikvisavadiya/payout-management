@@ -1,30 +1,23 @@
-// src/lib/mongodb.ts
 import { MongoClient } from "mongodb";
 
-const uri = process.env.MONGODB_URI as string; // from .env.local
-const options = {};
+const uri = process.env.MONGODB_URI as string;
 
-if (!uri) {
-  throw new Error("Please define MONGODB_URI in .env.local");
-}
+if (!uri) throw new Error("MONGODB_URI not defined");
 
-let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
 declare global {
-  // eslint-disable-next-line no-var
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
 if (process.env.NODE_ENV === "development") {
   if (!global._mongoClientPromise) {
-    client = new MongoClient(uri, options);
+    const client = new MongoClient(uri);
     global._mongoClientPromise = client.connect();
   }
   clientPromise = global._mongoClientPromise;
 } else {
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
+  clientPromise = new MongoClient(uri).connect();
 }
 
 export default clientPromise;
